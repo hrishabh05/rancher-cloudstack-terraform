@@ -1,0 +1,22 @@
+#cloud-config
+
+packages:
+  - qemu-guest-agent
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg-agent
+  - software-properties-common
+runcmd:
+  - echo "Setting up the ubuntu user..."
+  - useradd -m -s /bin/bash ubuntu
+  - echo "ubuntu:linux" | chpasswd
+  - sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
+  - systemctl restart sshd
+  - apt update -y
+  - apt install -y docker.io
+  - systemctl start docker
+  - systemctl enable docker
+  - ${register_cmd}
+
+

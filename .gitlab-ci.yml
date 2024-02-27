@@ -1,0 +1,47 @@
+# image: registry.gitlab.com/gitlab-org/terraform-images/stable:latest
+
+variables:
+  TF_ROOT: ${CI_PROJECT_DIR}
+  TF_ADDRESS: http://gitlab-ce.os3.com/api/v4/projects/16/terraform/state/demo4
+
+# cache:
+#   key: test1
+#   paths:
+#     - ${TF_ROOT}/.terraform
+
+before_script:
+  - cd ${TF_ROOT}
+  - terraform init 
+
+stages:
+  - terraform_plan
+  - terraform_deploy
+
+terraform_plan:
+  stage: terraform_plan
+  tags:
+    - "shell"
+  script:
+    - terraform init
+    - terraform validate
+    - terraform plan -lock=false -out="planfile" 
+    - ls
+  artifacts:
+    name: plan
+    paths:
+      - ${CI_PROJECT_DIR}/planfile  # Adjust the path to the artifact
+  when: manual
+
+terraform_deploy:
+  stage: terraform_deploy
+  tags:
+    - "shell"
+  script: 
+    - terraform apply -lock=false -auto-approve 
+  # artifacts:
+  #   name: plan
+  #   paths:
+  #     - ${CI_PROJECT_DIR}/planfile  # Adjust the path to the artifact
+  when: manual
+
+
